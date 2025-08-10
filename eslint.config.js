@@ -6,7 +6,7 @@ import pluginReactConfig from "eslint-plugin-react/configs/recommended.js";
 export default [
   { 
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"], 
-    ignores: ["dist/**/*", "node_modules/**/*", "build/**/*"] 
+    ignores: ["dist/**", "node_modules/**", "build/**", "**/dist/**", "**/node_modules/**"] 
   },
   {
     languageOptions: {
@@ -41,6 +41,8 @@ export default [
           // Material props
           "vertexShader", "fragmentShader", "uniforms", "transparent", 
           "depthWrite", "blending", "toneMapped", "sizeAttenuation", "side",
+          "color", "emissive", "emissiveIntensity", "roughness", "metalness",
+          "transmission", "thickness", "opacity",
           // Buffer geometry props
           "count", "array", "itemSize",
           // Three.js object props
