@@ -1,7 +1,8 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Suspense, lazy, useState } from 'react'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, ChromaticAberration, Glitch, Vignette, Noise } from '@react-three/postprocessing'
+import { BlendFunction, GlitchMode } from 'postprocessing'
 
 const Scene = lazy(() => import('./Scene').then(module => ({ default: module.Scene })))
 const PatternScene = lazy(() => import('./PatternScene').then(module => ({ default: module.PatternScene })))
@@ -130,10 +131,31 @@ export default function App() {
             <EffectComposer>
               <Scene mode="sound" />
               <Bloom
-                intensity={1.5}
-                luminanceThreshold={0.1}
-                luminanceSmoothing={0.025}
+                intensity={2.5}
+                luminanceThreshold={0.05}
+                luminanceSmoothing={0.015}
                 mipmapBlur={true}
+              />
+              <ChromaticAberration
+                blendFunction={BlendFunction.NORMAL}
+                offset={[0.008, 0.012]}
+              />
+              <Glitch
+                delay={[2.0, 8.0]}
+                duration={[0.2, 0.6]}
+                strength={[0.1, 0.3]}
+                mode={GlitchMode.SPORADIC}
+                active={true}
+                ratio={0.95}
+              />
+              <Vignette
+                eskil={false}
+                offset={0.15}
+                darkness={0.4}
+              />
+              <Noise
+                opacity={0.03}
+                blendFunction={BlendFunction.SCREEN}
               />
             </EffectComposer>
           ) : currentScene === 'original' ? (

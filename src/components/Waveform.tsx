@@ -26,25 +26,41 @@ const fragmentShader = `
   varying vec2 vUv;
   varying float vWave;
 
-  // Define neon colors
-  const vec3 colorBlue = vec3(0.1, 0.4, 1.0);
-  const vec3 colorPurple = vec3(0.7, 0.2, 1.0);
-  const vec3 colorPink = vec3(1.0, 0.2, 0.7);
-  const vec3 colorOrange = vec3(1.0, 0.6, 0.2);
+  // Enhanced cyberpunk color palette
+  const vec3 colorDeepBlue = vec3(0.05, 0.15, 0.8);
+  const vec3 colorElectricCyan = vec3(0.0, 0.9, 1.0);
+  const vec3 colorNeonPink = vec3(1.0, 0.1, 0.6);
+  const vec3 colorBrightOrange = vec3(1.0, 0.4, 0.0);
+  const vec3 colorHotWhite = vec3(2.0, 2.0, 2.0);
 
   void main() {
-    // Create a multi-color gradient based on horizontal position (uv.x)
-    float step1 = smoothstep(0.0, 0.3, vUv.x);
-    float step2 = smoothstep(0.3, 0.6, vUv.x);
-    float step3 = smoothstep(0.6, 1.0, vUv.x);
+    // Enhanced multi-layer color mixing
+    float pos = vUv.x;
+    float waveIntensity = abs(vWave);
+    
+    // Primary color transitions
+    float step1 = smoothstep(0.0, 0.25, pos);
+    float step2 = smoothstep(0.25, 0.5, pos);
+    float step3 = smoothstep(0.5, 0.75, pos);
+    float step4 = smoothstep(0.75, 1.0, pos);
 
-    vec3 finalColor = mix(colorBlue, colorPurple, step1);
-    finalColor = mix(finalColor, colorPink, step2);
-    finalColor = mix(finalColor, colorOrange, step3);
+    vec3 baseColor = mix(colorDeepBlue, colorElectricCyan, step1);
+    baseColor = mix(baseColor, colorNeonPink, step2);
+    baseColor = mix(baseColor, colorBrightOrange, step3);
+    baseColor = mix(baseColor, colorHotWhite, step4 * 0.3);
 
-    // Add brightness based on the wave height to make peaks glow more
-    float brightness = smoothstep(0.0, 0.6, abs(vWave));
-    finalColor += brightness * 0.8;
+    // Enhanced brightness and glow effects
+    float brightness = smoothstep(0.0, 0.8, waveIntensity);
+    float superBright = smoothstep(0.6, 1.0, waveIntensity);
+    
+    vec3 finalColor = baseColor * (1.0 + brightness * 1.5);
+    
+    // Add hot white peaks for maximum impact
+    finalColor += colorHotWhite * superBright * 0.7;
+    
+    // Subtle edge glow
+    float edgeGlow = smoothstep(0.0, 0.1, vUv.x) * smoothstep(1.0, 0.9, vUv.x);
+    finalColor += colorElectricCyan * edgeGlow * 0.3;
 
     gl_FragColor = vec4(finalColor, 1.0);
   }
@@ -61,18 +77,20 @@ function Wave() {
 
   const uniforms = {
     uTime: { value: 0 },
-    uFrequency: { value: 5.0 },
-    uAmplitude: { value: 0.3 },
+    uFrequency: { value: 8.0 },
+    uAmplitude: { value: 0.5 },
   }
 
   return (
     <mesh>
-      <planeGeometry args={[10, 2, 128, 128]} />
+      <planeGeometry args={[12, 3, 256, 256]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
         uniforms={uniforms}
+        toneMapped={false}
+        transparent={true}
       />
     </mesh>
   )
