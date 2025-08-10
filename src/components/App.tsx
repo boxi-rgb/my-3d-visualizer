@@ -1,12 +1,13 @@
 import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 import { Suspense, lazy, useState } from 'react'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
-const OrbitControls = lazy(() => import('@react-three/drei').then(module => ({ default: module.OrbitControls })))
 const Scene = lazy(() => import('./Scene').then(module => ({ default: module.Scene })))
 const PatternScene = lazy(() => import('./PatternScene').then(module => ({ default: module.PatternScene })))
 
 export default function App() {
-  const [currentScene, setCurrentScene] = useState<'original' | 'patterns'>('original')
+  const [currentScene, setCurrentScene] = useState<'original' | 'patterns' | 'sound'>('sound')
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -19,6 +20,22 @@ export default function App() {
         display: 'flex',
         gap: '10px'
       }}>
+        <button
+          onClick={() => setCurrentScene('sound')}
+          style={{
+            padding: '10px 20px',
+            background: currentScene === 'sound' ? '#4299e1' : 'rgba(255,255,255,0.2)',
+            color: currentScene === 'sound' ? 'white' : '#ffffff',
+            border: '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: currentScene === 'sound' ? 'bold' : 'normal',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          🎵 Sound Wave
+        </button>
         <button
           onClick={() => setCurrentScene('original')}
           style={{
@@ -67,7 +84,15 @@ export default function App() {
         backdropFilter: 'blur(10px)',
         maxWidth: '300px'
       }}>
-        {currentScene === 'original' ? (
+        {currentScene === 'sound' ? (
+          <>
+            <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>🎵 Sound Wave Visualizer</div>
+            <div>インタラクティブ音波ビジュアライザー</div>
+            <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '5px' }}>
+              マウス: 回転 | ホイール: ズーム | クリック: インタラクション
+            </div>
+          </>
+        ) : currentScene === 'original' ? (
           <>
             <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>🎮 Original Scene</div>
             <div>虹色エッジの回転キューブ</div>
@@ -83,9 +108,12 @@ export default function App() {
         )}
       </div>
 
-      <Canvas camera={{ position: [0, 0, 8] }}>
+      <Canvas camera={{ position: [0, 0, currentScene === 'sound' ? 10 : 8], fov: 75 }}>
         {/* 背景色 */}
-        <color attach="background" args={currentScene === 'original' ? ['#101010'] : ['#1a202c']} />
+        <color attach="background" args={
+          currentScene === 'sound' ? ['#101010'] : 
+          currentScene === 'original' ? ['#101010'] : ['#1a202c']
+        } />
 
         <Suspense fallback={null}>
           {/* マウス操作 */}
@@ -98,7 +126,21 @@ export default function App() {
           />
 
           {/* シーンコンポーネント */}
-          {currentScene === 'original' ? <Scene /> : <PatternScene />}
+          {currentScene === 'sound' ? (
+            <EffectComposer>
+              <Scene mode="sound" />
+              <Bloom
+                intensity={1.5}
+                luminanceThreshold={0.1}
+                luminanceSmoothing={0.025}
+                mipmapBlur={true}
+              />
+            </EffectComposer>
+          ) : currentScene === 'original' ? (
+            <Scene mode="original" />
+          ) : (
+            <PatternScene />
+          )}
         </Suspense>
       </Canvas>
     </div>
